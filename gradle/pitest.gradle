@@ -1,0 +1,11 @@
+pitest {
+    // adds dependency to org.pitest:pitest-junit5-plugin and sets "testPlugin" to "junit5"
+    junit5PluginVersion = '1.1.2'
+    mutators = ['DEFAULTS']
+    testSourceSets = [sourceSets.test, sourceSets.integration]
+    avoidCallsTo = ['com.example.audit']
+    excludedClasses = ['*Application*','*Config*', '*Mapper*']
+    mutationThreshold = 75
+    historyInputLocation = 'build/.pitHistory'
+    historyOutputLocation = 'build/.pitHistory'
+}

@@ -1,0 +1,14 @@
+datasources:
+
+spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 5000
+            readTimeout: 5000
+            logger-level: basic
+            error-decoder: be.modyo.commons.handlers.DefaultFeignErrorDecoder
+          users-client:
+            url: https://reqres.in/api/users

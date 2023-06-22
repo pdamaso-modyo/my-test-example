@@ -1,0 +1,108 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.1.0'
+    id 'io.spring.dependency-management' version '1.1.0'
+    id 'jacoco'
+    id 'org.sonarqube' version '4.0.0.2929'
+    id 'org.cyclonedx.bom' version '1.7.2'
+    id "name.remal.integration-tests" version "3.0.0"
+    id 'info.solidsoft.pitest' version '1.9.11'
+}
+
+group = 'com.modyo.example'
+version = '1.0.0'
+sourceCompatibility = 17
+
+apply from: 'gradle/jacoco.gradle'
+apply from: 'gradle/sonar.gradle'
+apply from: 'gradle/pitest.gradle'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+compileJava {
+    sourceCompatibility = 17
+    targetCompatibility = 17
+    options.encoding = 'UTF-8'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+ext {
+  set('springCloudVersion', "2022.0.3")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    implementation {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+    configureEach {
+        /* only junit 5 should be used */
+        exclude group: 'junit', module: 'junit'
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+}
+
+dependencies {
+
+    // Spring Boot Framework
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-undertow'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // Swagger by SpringDoc (OpenAPI 3)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+
+    // Mapstruct
+    implementation 'org.mapstruct:mapstruct:1.5.3.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+
+    // Database Access - Enable other drivers if needed
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'com.h2database:h2'
+    //runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // Spring Cloud (observability, rest client, circuit breaker)
+    implementation 'org.springframework.cloud:spring-cloud-starter'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    //implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
+
+    // Security Updates
+    implementation 'org.yaml:snakeyaml:2.0'
+
+    // Testing
+    testImplementation "org.springframework.boot:spring-boot-starter-test"
+    testImplementation "com.tngtech.archunit:archunit:1.0.1"
+}
+
+tasks.withType(Test).configureEach {
+    systemProperty 'file.encoding', 'utf-8'
+    useJUnitPlatform()
+}
+
+testSourceSets {
+    integration
+}
+
+springBoot {
+    buildInfo()
+}
